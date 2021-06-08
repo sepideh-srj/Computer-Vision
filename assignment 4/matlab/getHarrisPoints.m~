@@ -1,0 +1,63 @@
+% function [points] = getHarrisPoints(I, alpha, k)
+k = 0.05;
+alpha = 20;
+I = imread('../data/bedroom/sun_aacyfyrluprisdrx.jpg');
+
+
+if (size(I,3) == 3)
+        I = rgb2gray(I);
+end
+
+% I = double(I);
+% h = fspecial('gaussian');
+% smoothed = conv2(I ,h,'same');
+% 
+% Gx = [-1, 0, 1; -2, 0, 2; -1, 0, 1];
+% Gy = Gx';
+% imgx = conv2(smoothed, Gx, 'same');
+% imgy = conv2(smoothed, Gy, 'same');
+
+[imgx,imgy] = imgradientxy(I);
+
+Ixx = imgx .* imgx;
+Ixy = imgx .* imgy;
+Iyy = imgy .* imgy;
+
+w = ones(3,3);
+M1 = conv2(Ixx,w,'same');
+M2 = conv2(Ixy,w,'same');
+M3 = M2;
+M4 = conv2(Iyy,w,'same');
+M = [M1, M2; M3, M4];
+detM = M1 .* M4 - M3 .* M2;
+traceM = M1 + M4;
+R = detM - k* traceM.^2;
+R(R<0) = 0;
+R2 = zeros(size(R,1)+2, size(R,2)+2) ;
+R2(2:end-1,2:end-1) = R;
+R = R2;
+
+leftDiff = R(2:end-1,2:end-1) - R(2:end-1,1:end-2);
+topDiff = R(2:end-1,2:end-1) - R(1:end-2,2:end-1);
+rightDiff = R(2:end-1,2:end-1) - R(2:end-1,3:end);
+bottomDiff = R(2:end-1,2:end-1) - R(3:end,2:end-1);
+bottomleftDiff = R(2:end-1,2:end-1) - R(3:end,1:end-2);
+bottomrightDiff = R(2:end-1,2:end-1) - R(3:end,3:end);
+toprightDiff = R(2:end-1,2:end-1) - R(1:end-2,3:end);
+topleftDiff = R(2:end-1,2:end-1) - R(1:end-2,1:end-2);
+
+[row,col] = find(leftDiff >0 & topDiff >0 & rightDiff >0 & bottomDiff >0 & bottomleftDiff >0 ...
+    & topleftDiff >0 & toprightDiff >0);
+B = zeros(size(R)) ;
+B(row,col) = R(row,col);
+[~,indices] = sort(B(:),'descend');  
+maxIndex = indices(1:alpha);
+
+[points(:, 1), points(:, 2)] = ind2sub(size(I), maxIndex);
+                                                
+% maxIndex = sortIndex(1:2*alpha);
+% % maxIndex = maxIndex(2:2:end);
+
+
+
+% end

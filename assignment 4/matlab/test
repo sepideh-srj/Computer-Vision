@@ -1,0 +1,7 @@
+% function [filterResponses] = extractFilterResponses(I, filterBank)
+I = imread('../data/bedroom/sun_aacyfyrluprisdrx.jpg');
+I = RGB2Lab(I);
+
+
+
+end
